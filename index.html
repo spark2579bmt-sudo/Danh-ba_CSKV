@@ -4,150 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Danh sách CBCS CSKV</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js -->
+    <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- SheetJS (XLSX) -->
+    <!-- SheetJS (XLSX) CDN -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans" x-data="cskvApp()" x-init="init()">
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800" x-data="cskvApp()" x-init="init()">
 
     <div class="container mx-auto px-4 py-8 max-w-7xl">
         
         <!-- TIÊU ĐỀ -->
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">
                     <i data-lucide="shield-check" class="w-8 h-8 text-blue-600"></i> Quản lý Danh sách CBCS CSKV
                 </h1>
-                <p class="text-gray-500 text-sm mt-1">Đồng bộ chuẩn biểu mẫu danh sách cán bộ chiến sĩ Cảnh sát khu vực</p>
+                <p class="text-gray-500 text-sm mt-1">Hệ thống quản lý dữ liệu Cán bộ chiến sĩ Cảnh sát khu vực chuẩn biểu mẫu</p>
             </div>
             
             <!-- CÁC NÚT THAO TÁC -->
-            <div class="flex flex-wrap gap-2">
-                <button @click="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow transition">
-                    <i data-lucide="user-plus" class="w-5 h-5"></i> Thêm mới
+            <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+                <button @click="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition text-sm font-medium">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> Thêm mới
                 </button>
-                <button @click="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow transition">
-                    <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Xuất Excel (Chuẩn mẫu)
+                <button @click="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition text-sm font-medium">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Xuất Excel chuẩn mẫu
                 </button>
-                <label class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow transition cursor-pointer">
-                    <i data-lucide="file-up" class="w-5 h-5"></i> Nhập Excel
+                <label class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition cursor-pointer text-sm font-medium">
+                    <i data-lucide="file-up" class="w-4 h-4"></i> Nhập Excel
                     <input type="file" accept=".xlsx, .xls" class="hidden" @change="importExcel($event)">
                 </label>
-                <button @click="confirmDeleteAll()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow transition">
-                    <i data-lucide="trash-2" class="w-5 h-5"></i> Xóa toàn bộ
+                <button @click="confirmDeleteAll()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-xl flex items-center gap-2 transition text-sm font-medium">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa hết
                 </button>
             </div>
         </header>
 
         <!-- THỐNG KÊ TỔNG QUAN -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Tổng số CBCS</p>
-                    <h3 class="text-2xl font-bold text-gray-800 mt-1" x-text="cskvList.length">0</h3>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Tổng số CBCS</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1" x-text="cskvList.length">0</h3>
                 </div>
-                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
                     <i data-lucide="users" class="w-6 h-6"></i>
                 </div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Tổng số Hộ thường trú</p>
-                    <h3 class="text-2xl font-bold text-gray-800 mt-1" x-text="totalHoThuongTru">0</h3>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Hộ thường trú</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1" x-text="totalHoThuongTru">0</h3>
                 </div>
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                     <i data-lucide="home" class="w-6 h-6"></i>
                 </div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Tổng số Khẩu thường trú</p>
-                    <h3 class="text-2xl font-bold text-gray-800 mt-1" x-text="totalKhauThuongTru">0</h3>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Khẩu thường trú</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1" x-text="totalKhauThuongTru">0</h3>
                 </div>
-                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
                     <i data-lucide="user-check" class="w-6 h-6"></i>
                 </div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium">Tổng số Khẩu tạm trú</p>
-                    <h3 class="text-2xl font-bold text-gray-800 mt-1" x-text="totalKhauTamTru">0</h3>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Khẩu tạm trú</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1" x-text="totalKhauTamTru">0</h3>
                 </div>
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
                     <i data-lucide="users-round" class="w-6 h-6"></i>
                 </div>
             </div>
         </div>
 
-        <!-- TÌM KIẾM VÀ SẮP XẾP -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-            <div class="flex flex-wrap gap-3 w-full md:w-auto flex-1">
-                <div class="relative flex-1 min-w-[200px]">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                    </span>
-                    <input type="text" x-model="searchQuery" placeholder="Tìm theo họ tên, số hiệu, địa bàn, quê quán..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                </div>
-                <input type="text" x-model="filterChucVu" placeholder="Lọc theo chức vụ..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full md:w-48">
+        <!-- TÌM KIẾM VÀ BỘ LỌC -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div class="relative flex-1 w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </span>
+                <input type="text" x-model="searchQuery" placeholder="Tìm theo họ tên, số hiệu, địa bàn phụ trách, quê quán..." class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <span class="text-sm text-gray-500 whitespace-nowrap">Sắp xếp:</span>
-                <select x-model="sortBy" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
-                    <option value="name_asc">Họ tên (A-Z)</option>
-                    <option value="name_desc">Họ tên (Z-A)</option>
-                    <option value="dob_asc">Năm sinh (Tăng dần)</option>
+                <select x-model="sortBy" class="px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <option value="name_asc">Họ tên (A - Z)</option>
+                    <option value="name_desc">Họ tên (Z - A)</option>
+                    <option value="dob_asc">Năm sinh tăng dần</option>
                 </select>
             </div>
         </div>
 
-        <!-- BẢNG DANH SÁCH -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <!-- BẢNG HIỂN THỊ DỮ LIỆU -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs font-semibold uppercase tracking-wider">
-                            <th class="py-3 px-4 text-center w-16">TT</th>
-                            <th class="py-3 px-4 w-20">Ảnh</th>
-                            <th class="py-3 px-4">Họ tên / Số hiệu</th>
-                            <th class="py-3 px-4">Cấp bậc / Chức vụ</th>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                            <th class="py-3 px-4 text-center w-12">TT</th>
+                            <th class="py-3 px-4 w-16">Ảnh</th>
+                            <th class="py-3 px-4">Họ tên & Số hiệu</th>
+                            <th class="py-3 px-4">Cấp bậc & Chức vụ</th>
                             <th class="py-3 px-4">Địa bàn phụ trách</th>
-                            <th class="py-3 px-4 text-center">Hộ/Khẩu TT</th>
+                            <th class="py-3 px-4 text-center">Hộ / Khẩu TT</th>
                             <th class="py-3 px-4 text-center">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
+                    <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
                         <template x-for="(item, index) in filteredList" :key="item.id">
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3 px-4 text-center font-medium text-gray-500" x-text="index + 1"></td>
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="py-3 px-4 text-center font-medium text-gray-400" x-text="index + 1"></td>
                                 <td class="py-3 px-4">
-                                    <img :src="item.image || 'https://via.placeholder.com/150?text=No+Image'" class="w-10 h-10 object-cover rounded-full border border-gray-300 shadow-sm">
+                                    <img :src="item.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'" class="w-10 h-10 object-cover rounded-xl border border-gray-200 shadow-sm">
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="font-bold text-gray-900" x-text="item['Họ tên']"></div>
-                                    <div class="text-xs text-gray-500" x-text="'Số hiệu: ' + (item['Số hiệu '] || 'Chưa có')"></div>
+                                    <div class="font-semibold text-gray-900" x-text="item['Họ tên']"></div>
+                                    <div class="text-xs text-gray-400" x-text="'Số hiệu: ' + (item['Số hiệu '] || 'Chưa có')"></div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="font-medium text-blue-700" x-text="item['Cấp bậc']"></div>
-                                    <div class="text-xs text-gray-600" x-text="item['Chức vụ']"></div>
+                                    <div class="font-medium text-blue-600" x-text="item['Cấp bậc']"></div>
+                                    <div class="text-xs text-gray-500" x-text="item['Chức vụ']"></div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="text-gray-900" x-text="item['Địa bàn phụ trách']"></div>
-                                    <div class="text-xs text-gray-500" x-text="'SĐT: ' + (item['Số điện thoại'] || 'Chưa có')"></div>
+                                    <div class="text-gray-800" x-text="item['Địa bàn phụ trách']"></div>
+                                    <div class="text-xs text-gray-400" x-text="'SĐT: ' + (item['Số điện thoại'] || 'Chưa có')"></div>
                                 </td>
                                 <td class="py-3 px-4 text-center">
-                                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-medium" x-text="(item['Tổng số hộ thường trú'] || 0) + ' hộ / ' + (item['Tổng số khẩu thường trú'] || 0) + ' khẩu'"></span>
+                                    <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-lg font-medium" x-text="(item['Tổng số hộ thường trú'] || 0) + ' hộ / ' + (item['Tổng số khẩu thường trú'] || 0) + ' khẩu'"></span>
                                 </td>
                                 <td class="py-3 px-4 text-center">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <button @click="editItem(item)" class="p-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg transition" title="Sửa chi tiết">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <button @click="editItem(item)" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl transition" title="Chỉnh sửa">
                                             <i data-lucide="pencil" class="w-4 h-4"></i>
                                         </button>
-                                        <button @click="deleteItem(item.id)" class="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition" title="Xóa">
+                                        <button @click="deleteItem(item.id)" class="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition" title="Xóa">
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </div>
@@ -156,7 +153,7 @@
                         </template>
                         <template x-if="filteredList.length === 0">
                             <tr>
-                                <td colspan="7" class="py-8 text-center text-gray-400">Không tìm thấy dữ liệu phù hợp.</td>
+                                <td colspan="7" class="py-12 text-center text-gray-400">Không tìm thấy dữ liệu phù hợp.</td>
                             </tr>
                         </template>
                     </tbody>
@@ -164,197 +161,113 @@
             </div>
         </div>
 
-        <!-- MODAL THÊM / SỬA CHI TIẾT ĐẦY ĐỦ CÁC TRƯỜNG MẪU -->
-        <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4" style="display: none;">
-            <div @click.outside="closeModal()" class="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden transform transition-all">
-                <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white sticky top-0 z-10">
-                    <h3 class="text-lg font-bold" x-text="isEditing ? 'Cập nhật thông tin CBCS CSKV' : 'Thêm mới CBCS CSKV'"></h3>
-                    <button @click="closeModal()" class="text-white hover:text-gray-200"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <!-- MODAL FORM NHẬP / SỬA -->
+        <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;">
+            <div @click.outside="closeModal()" class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden">
+                <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white">
+                    <h3 class="font-bold text-lg" x-text="isEditing ? 'Cập nhật thông tin cán bộ' : 'Thêm mới cán bộ chiến sĩ'"></h3>
+                    <button @click="closeModal()" class="text-white/80 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
                 </div>
                 
-                <form @submit.prevent="saveItem()" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-                    
-                    <!-- 1. ẢNH ĐẠI DIỆN & CAMERA -->
-                    <div class="flex flex-col sm:flex-row items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <img :src="form.image || 'https://via.placeholder.com/150?text=No+Image'" class="w-24 h-24 object-cover rounded-xl border border-gray-300 shadow">
+                <form @submit.prevent="saveItem()" class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                    <!-- Ảnh & Camera -->
+                    <div class="flex flex-col sm:flex-row items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                        <img :src="form.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'" class="w-20 h-20 object-cover rounded-xl border shadow-sm">
                         <div class="flex-1 space-y-2 w-full">
-                            <label class="block text-sm font-medium text-gray-700">Hình ảnh đại diện cán bộ</label>
+                            <label class="block text-xs font-semibold text-gray-600">Ảnh đại diện CBCS</label>
                             <div class="flex flex-wrap gap-2">
-                                <label class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer flex items-center gap-1 shadow-sm">
-                                    <i data-lucide="upload" class="w-4 h-4"></i> Chọn file ảnh
+                                <label class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="upload" class="w-3.5 h-3.5"></i> Tải ảnh lên
                                     <input type="file" accept="image/*" class="hidden" @change="handleFileUpload($event)">
                                 </label>
-                                <button type="button" @click="startCamera()" class="bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 shadow-sm">
-                                    <i data-lucide="camera" class="w-4 h-4"></i> Mở Camera
+                                <button type="button" @click="startCamera()" class="bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="camera" class="w-3.5 h-3.5"></i> Mở Camera
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Khung Video Camera -->
-                    <div x-show="isCameraOpen" class="space-y-2 bg-black p-2 rounded-xl text-center">
-                        <video id="cameraStream" autoplay playsinline class="w-full max-h-64 object-contain rounded-lg mx-auto"></video>
+                    <!-- Khung Camera trực tiếp -->
+                    <div x-show="isCameraOpen" class="space-y-2 bg-black p-3 rounded-2xl text-center">
+                        <video id="cameraStream" autoplay playsinline class="w-full max-h-56 object-contain rounded-xl mx-auto"></video>
                         <div class="flex justify-center gap-2">
-                            <button type="button" @click="capturePhoto()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs font-medium">Chụp ảnh</button>
-                            <button type="button" @click="stopCamera()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-xs font-medium">Đóng camera</button>
+                            <button type="button" @click="capturePhoto()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-xl text-xs font-medium">Chụp ảnh</button>
+                            <button type="button" @click="stopCamera()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-xl text-xs font-medium">Đóng camera</button>
                         </div>
                     </div>
                     <canvas id="cameraCanvas" class="hidden"></canvas>
 
-                    <!-- NHÓM 1: THÔNG TIN CÁ NHÂN -->
-                    <div>
-                        <h4 class="text-sm font-bold text-blue-600 uppercase border-b pb-1 mb-3">I. Thông tin cá nhân cơ bản</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Họ tên *</label>
-                                <input type="text" x-model="form['Họ tên']" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Năm sinh (VD: 25/07/1979) *</label>
-                                <input type="text" x-model="form['Năm sinh']" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tuổi</label>
-                                <input type="text" x-model="form['Tuổi']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Giới tính</label>
-                                <select x-model="form['Giới tính']" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
-                                    <option value="Nam">Nam</option>
-                                    <option value="Nữ">Nữ</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Dân tộc</label>
-                                <input type="text" x-model="form['Dân tộc']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Số định danh</label>
-                                <input type="text" x-model="form['Số định danh']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Quê quán</label>
-                                <input type="text" x-model="form['Quê quán']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nơi cư trú</label>
-                                <input type="text" x-model="form['Nơi cư trú']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Số điện thoại</label>
-                                <input type="text" x-model="form['Số điện thoại']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
+                    <!-- Form Input Các Trường -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Họ tên *</label>
+                            <input type="text" x-model="form['Họ tên']" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
-                    </div>
-
-                    <!-- NHÓM 2: CÔNG TÁC & ĐỊA BÀN -->
-                    <div>
-                        <h4 class="text-sm font-bold text-blue-600 uppercase border-b pb-1 mb-3">II. Thông tin công tác & Địa bàn phụ trách</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Cấp bậc</label>
-                                <input type="text" x-model="form['Cấp bậc']" placeholder="VD: Đại úy" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Chức vụ</label>
-                                <input type="text" x-model="form['Chức vụ']" placeholder="VD: Cảnh sát khu vực" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Số hiệu</label>
-                                <input type="text" x-model="form['Số hiệu ']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Hệ số lương</label>
-                                <input type="text" x-model="form['Hệ số lương']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Địa bàn phụ trách</label>
-                                <input type="text" x-model="form['Địa bàn phụ trách']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng số hộ thường trú</label>
-                                <input type="number" x-model.number="form['Tổng số hộ thường trú']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng số khẩu thường trú</label>
-                                <input type="number" x-model.number="form['Tổng số khẩu thường trú']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng số hộ tạm trú</label>
-                                <input type="number" x-model.number="form['Tổng số hộ tạm trú']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng số khẩu tạm trú</label>
-                                <input type="number" x-model.number="form['Tổng số khẩu tạm trú']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Ngày vào ngành</label>
-                                <input type="text" x-model="form['Ngày vào Ngành']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Số thẻ Đảng</label>
-                                <input type="text" x-model="form['Số thẻ Đảng']" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Năm sinh *</label>
+                            <input type="text" x-model="form['Năm sinh']" required placeholder="VD: 25/07/1979" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
-                    </div>
-
-                    <!-- NHÓM 3: GIA ĐÌNH -->
-                    <div>
-                        <h4 class="text-sm font-bold text-blue-600 uppercase border-b pb-1 mb-3">III. Hoàn cảnh gia đình</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Họ tên cha & Năm sinh</label>
-                                <input type="text" x-model="form['Họ tên cha']" placeholder="Họ tên cha" class="w-full px-3 py-2 border rounded-lg text-sm mb-1">
-                                <input type="text" x-model="form['Năm sinh cha']" placeholder="Năm sinh cha" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Họ tên mẹ & Năm sinh</label>
-                                <input type="text" x-model="form['Họ tên mẹ']" placeholder="Họ tên mẹ" class="w-full px-3 py-2 border rounded-lg text-sm mb-1">
-                                <input type="text" x-model="form['Năm sinh mẹ']" placeholder="Năm sinh mẹ" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Họ tên vợ/chồng & Năm sinh</label>
-                                <input type="text" x-model="form['Họ tên vợ/ chồng']" placeholder="Họ tên vợ/chồng" class="w-full px-3 py-2 border rounded-lg text-sm mb-1">
-                                <input type="text" x-model="form['Năm sinh vợ/ chồng']" placeholder="Năm sinh vợ/chồng" class="w-full px-3 py-2 border rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Ghi chú</label>
-                                <textarea x-model="form['Ghi chú']" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Cấp bậc</label>
+                            <input type="text" x-model="form['Cấp bậc']" placeholder="VD: Đại úy" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Chức vụ</label>
+                            <input type="text" x-model="form['Chức vụ']" placeholder="VD: Cảnh sát khu vực" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Số hiệu</label>
+                            <input type="text" x-model="form['Số hiệu ']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Số điện thoại</label>
+                            <input type="text" x-model="form['Số điện thoại']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Địa bàn phụ trách</label>
+                            <input type="text" x-model="form['Địa bàn phụ trách']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng hộ thường trú</label>
+                            <input type="number" x-model.number="form['Tổng số hộ thường trú']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng khẩu thường trú</label>
+                            <input type="number" x-model.number="form['Tổng số khẩu thường trú']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng khẩu tạm trú</label>
+                            <input type="number" x-model.number="form['Tổng số khẩu tạm trú']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-2 pt-4 border-t">
-                        <button type="button" @click="closeModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium">Hủy</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow">Lưu thông tin</button>
+                        <button type="button" @click="closeModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium">Hủy</button>
+                        <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium shadow">Lưu thông tin</button>
                     </div>
                 </form>
             </div>
         </div>
-
     </div>
 
-    <!-- SCRIPT LOGIC -->
+    <!-- SCRIPT CHÍNH -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('cskvApp', () => ({
                 cskvList: [],
                 searchQuery: '',
-                filterChucVu: '',
                 sortBy: 'name_asc',
                 showModal: false,
                 isEditing: false,
                 isCameraOpen: false,
                 mediaStream: null,
-                
                 form: {},
 
                 init() {
-                    const savedData = localStorage.getItem('cskv_ds_cbcs');
+                    const savedData = localStorage.getItem('cskv_ds_cbcs_v2');
                     if (savedData) {
                         this.cskvList = JSON.parse(savedData);
                     } else {
-                        // Mẫu dữ liệu ban đầu theo đúng chuẩn các cột
                         this.cskvList = [
                             {
                                 id: 1,
@@ -362,22 +275,14 @@
                                 'TT': 1,
                                 'Họ tên': 'Nguyễn Văn A',
                                 'Năm sinh': '25/07/1979',
-                                'Tuổi': 47,
-                                'Giới tính': 'Nam',
-                                'Dân tộc': 'Kinh',
-                                'Quê quán': 'Hà Nội',
-                                'Nơi cư trú': 'Đà Nẵng',
                                 'Cấp bậc': 'Thiếu tá',
                                 'Chức vụ': 'Cảnh sát khu vực',
-                                'Hệ số lương': '4.32',
                                 'Địa bàn phụ trách': 'Khu phố 1',
                                 'Tổng số hộ thường trú': 120,
                                 'Tổng số khẩu thường trú': 450,
-                                'Tổng số hộ tạm trú': 15,
                                 'Tổng số khẩu tạm trú': 30,
                                 'Số hiệu ': '123-456',
-                                'Số điện thoại': '0905123456',
-                                'Ghi chú': 'Hoàn thành tốt nhiệm vụ'
+                                'Số điện thoại': '0905123456'
                             }
                         ];
                         this.saveToStorage();
@@ -390,7 +295,7 @@
                 },
 
                 saveToStorage() {
-                    localStorage.setItem('cskv_ds_cbcs', JSON.stringify(this.cskvList));
+                    localStorage.setItem('cskv_ds_cbcs_v2', JSON.stringify(this.cskvList));
                 },
 
                 get totalHoThuongTru() {
@@ -405,34 +310,24 @@
 
                 get filteredList() {
                     let result = [...this.cskvList];
-
                     if (this.searchQuery.trim() !== '') {
                         const q = this.searchQuery.toLowerCase();
                         result = result.filter(item => 
                             (item['Họ tên'] && item['Họ tên'].toLowerCase().includes(q)) ||
                             (item['Địa bàn phụ trách'] && item['Địa bàn phụ trách'].toLowerCase().includes(q)) ||
-                            (item['Số hiệu '] && String(item['Số hiệu ']).toLowerCase().includes(q)) ||
-                            (item['Quê quán'] && item['Quê quán'].toLowerCase().includes(q))
+                            (item['Số hiệu '] && String(item['Số hiệu ']).toLowerCase().includes(q))
                         );
                     }
-
-                    if (this.filterChucVu.trim() !== '') {
-                        const cv = this.filterChucVu.toLowerCase();
-                        result = result.filter(item => item['Chức vụ'] && item['Chức vụ'].toLowerCase().includes(cv));
-                    }
-
                     result.sort((a, b) => {
                         const nameA = a['Họ tên'] || '';
                         const nameB = b['Họ tên'] || '';
                         const dobA = String(a['Năm sinh'] || '');
                         const dobB = String(b['Năm sinh'] || '');
-
                         if (this.sortBy === 'name_asc') return nameA.localeCompare(nameB);
                         if (this.sortBy === 'name_desc') return nameB.localeCompare(nameA);
                         if (this.sortBy === 'dob_asc') return dobA.localeCompare(dobB);
                         return 0;
                     });
-
                     return result;
                 },
 
@@ -443,22 +338,14 @@
                         image: '',
                         'Họ tên': '',
                         'Năm sinh': '',
-                        'Tuổi': '',
-                        'Giới tính': 'Nam',
-                        'Dân tộc': 'Kinh',
-                        'Quê quán': '',
-                        'Nơi cư trú': '',
                         'Cấp bậc': '',
-                        'Chức vụ': '',
-                        'Hệ số lương': '',
+                        'Chức vụ': 'Cảnh sát khu vực',
                         'Địa bàn phụ trách': '',
                         'Tổng số hộ thường trú': 0,
                         'Tổng số khẩu thường trú': 0,
-                        'Tổng số hộ tạm trú': 0,
                         'Tổng số khẩu tạm trú': 0,
                         'Số hiệu ': '',
-                        'Số điện thoại': '',
-                        'Ghi chú': ''
+                        'Số điện thoại': ''
                     };
                     this.showModal = true;
                 },
@@ -477,9 +364,7 @@
                 saveItem() {
                     if (this.isEditing) {
                         const index = this.cskvList.findIndex(i => i.id === this.form.id);
-                        if (index !== -1) {
-                            this.cskvList[index] = { ...this.form };
-                        }
+                        if (index !== -1) this.cskvList[index] = { ...this.form };
                     } else {
                         this.cskvList.push({ ...this.form });
                     }
@@ -487,13 +372,13 @@
                 },
 
                 deleteItem(id) {
-                    if (confirm('Bạn có chắc chắn muốn xóa cán bộ này?')) {
+                    if (confirm('Xóa cán bộ này ra khỏi danh sách?')) {
                         this.cskvList = this.cskvList.filter(i => i.id !== id);
                     }
                 },
 
                 confirmDeleteAll() {
-                    if (confirm('CẢNH BÁO: Xóa toàn bộ dữ liệu?')) {
+                    if (confirm('CẢNH BÁO: Xóa toàn bộ dữ liệu danh sách?')) {
                         this.cskvList = [];
                     }
                 },
@@ -502,9 +387,7 @@
                     const file = event.target.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.form.image = e.target.result;
-                        };
+                        reader.onload = (e) => { this.form.image = e.target.result; };
                         reader.readAsDataURL(file);
                     }
                 },
@@ -518,7 +401,7 @@
                             if (video) video.srcObject = this.mediaStream;
                         });
                     } catch (err) {
-                        alert('Không mở được camera!');
+                        alert('Không thể mở camera trên thiết bị này!');
                         this.isCameraOpen = false;
                     }
                 },
@@ -548,42 +431,35 @@
                     const dataToExport = this.cskvList.map((item, index) => {
                         let obj = { 'TT': index + 1 };
                         for (let key in item) {
-                            if (key !== 'id' && key !== 'image') {
-                                obj[key] = item[key];
-                            }
+                            if (key !== 'id' && key !== 'image') obj[key] = item[key];
                         }
                         return obj;
                     });
-
                     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                     const workbook = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-                    XLSX.writeFile(workbook, "DS_CBCS_CSKV_Xuat.xlsx");
+                    XLSX.writeFile(workbook, "DS_CBCS_CSKV_Chuan.xlsx");
                 },
 
                 importExcel(event) {
                     const file = event.target.files[0];
                     if (!file) return;
-
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         try {
                             const data = new Uint8Array(e.target.result);
                             const workbook = XLSX.read(data, { type: 'array' });
-                            const firstSheetName = workbook.SheetNames[0];
-                            const worksheet = workbook.Sheets[firstSheetName];
+                            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                             const json = XLSX.utils.sheet_to_json(worksheet);
-
                             const imported = json.map((row, index) => ({
                                 id: Date.now() + index,
                                 image: '',
                                 ...row
                             }));
-
                             this.cskvList.push(...imported);
-                            alert(`Đã nhập thành công ${imported.length} bản ghi từ file Excel theo đúng chuẩn mẫu!`);
+                            alert(`Đã nhập thành công ${imported.length} bản ghi!`);
                         } catch (err) {
-                            alert('Lỗi đọc file Excel!');
+                            alert('Lỗi đọc định dạng file Excel!');
                         }
                         event.target.value = '';
                     };
