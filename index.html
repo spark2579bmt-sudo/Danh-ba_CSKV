@@ -575,17 +575,44 @@
                     reader.onload = (e) => {
                         try {
                             const data = new Uint8Array(e.target.result);
-                            const workbook = XLSX.read(data, { type: 'array' });
+                            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                             const json = XLSX.utils.sheet_to_json(worksheet);
-                            const imported = json.map((row, index) => ({
-                                id: Date.now() + index,
-                                image: '',
-                                ...row
-                            }));
+                            
+                            const imported = json.map((row, index) => {
+                                let rawDob = row['Năm sinh'] || row['Ngày sinh'] || '';
+                                let formattedDob = '';
+
+                                if (rawDob instanceof Date) {
+                                    const d = String(rawDob.getDate()).padStart(2, '0');
+                                    const m = String(rawDob.getMonth() + 1).padStart(2, '0');
+                                    const y = rawDob.getFullYear();
+                                    formattedDob = `${d}/${m}/${y}`;
+                                } else if (!isNaN(rawDob) && typeof rawDob === 'number') {
+                                    const utc_days = Math.floor(rawDob - 25569);
+                                    const utc_value = utc_days * 86400;
+                                    const dateInfo = new Date(utc_value * 1000);
+                                    const d = String(dateInfo.getDate()).padStart(2, '0');
+                                    const m = String(dateInfo.getMonth() + 1).padStart(2, '0');
+                                    const y = dateInfo.getFullYear();
+                                    formattedDob = `${d}/${m}/${y}`;
+                                } else {
+                                    formattedDob = String(rawDob);
+                                }
+
+                                const newItem = {
+                                    id: Date.now() + index,
+                                    image: '',
+                                    ...row
+                                };
+                                newItem['Năm sinh'] = formattedDob;
+                                return newItem;
+                            });
+
                             this.cskvList.push(...imported);
                             alert(`Đã nhập thành công ${imported.length} bản ghi!`);
                         } catch (err) {
+                            console.error(err);
                             alert('Lỗi đọc định dạng file Excel!');
                         }
                         event.target.value = '';
