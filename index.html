@@ -10,6 +10,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- SheetJS (XLSX) CDN -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- QRCodeJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -118,21 +120,41 @@
             </div>
         </div>
 
-        <!-- THỐNG KÊ THEO NHÓM / ĐƠN VỊ / ĐỊA BÀN -->
+        <!-- THỐNG KÊ CHI TIẾT THEO CỘT TỔ CÔNG TÁC -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-6">
             <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Thống kê số lượng CBCS theo các Nhóm / Đơn vị
+                <i data-lucide="layers" class="w-4 h-4 text-purple-600"></i> Thống kê tổng hợp theo cột Tổ công tác
             </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                <template x-for="group in groupStats" :key="group.name">
-                    <div @click="searchQuery = group.name" class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 p-3 rounded-xl cursor-pointer transition flex flex-col justify-between">
-                        <span class="text-xs font-medium text-gray-600 line-clamp-1" x-text="group.name"></span>
-                        <div class="flex items-baseline justify-between mt-2">
-                            <span class="text-lg font-bold text-blue-600" x-text="group.count"></span>
-                            <span class="text-[10px] text-gray-400">CBCS</span>
-                        </div>
-                    </div>
-                </template>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase">
+                            <th class="py-2.5 px-3">Tổ công tác</th>
+                            <th class="py-2.5 px-3 text-center">Số lượng CBCS</th>
+                            <th class="py-2.5 px-3 text-center">Hộ thường trú</th>
+                            <th class="py-2.5 px-3 text-center">Khẩu thường trú</th>
+                            <th class="py-2.5 px-3 text-center">Hộ tạm trú</th>
+                            <th class="py-2.5 px-3 text-center">Khẩu tạm trú</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <template x-for="team in teamStats" :key="team.name">
+                            <tr class="hover:bg-gray-50 cursor-pointer" @click="searchQuery = team.name">
+                                <td class="py-2.5 px-3 font-semibold text-purple-600" x-text="team.name"></td>
+                                <td class="py-2.5 px-3 text-center font-medium" x-text="team.cbcsCount"></td>
+                                <td class="py-2.5 px-3 text-center" x-text="team.hoTT"></td>
+                                <td class="py-2.5 px-3 text-center" x-text="team.khauTT"></td>
+                                <td class="py-2.5 px-3 text-center" x-text="team.hoTP"></td>
+                                <td class="py-2.5 px-3 text-center" x-text="team.khauTP"></td>
+                            </tr>
+                        </template>
+                        <template x-if="teamStats.length === 0">
+                            <tr>
+                                <td colspan="6" class="py-4 text-center text-gray-400">Chưa có dữ liệu tổ công tác.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -142,7 +164,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                     <i data-lucide="search" class="w-4 h-4"></i>
                 </span>
-                <input type="text" x-model="searchQuery" placeholder="Tìm theo họ tên, số điện thoại, địa bàn phụ trách..." class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" x-model="searchQuery" placeholder="Tìm theo họ tên, số điện thoại, quê quán, nơi cư trú, tổ công tác..." class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <span class="text-sm text-gray-500 whitespace-nowrap">Sắp xếp:</span>
@@ -162,10 +184,11 @@
                         <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-semibold uppercase tracking-wider">
                             <th class="py-3 px-4 text-center w-12">TT</th>
                             <th class="py-3 px-4 w-16">Ảnh</th>
-                            <th class="py-3 px-4">Họ tên</th>
+                            <th class="py-3 px-4">Họ tên & Lý lịch</th>
                             <th class="py-3 px-4">Cấp bậc & Chức vụ</th>
-                            <th class="py-3 px-4">Địa bàn phụ trách</th>
-                            <th class="py-3 px-4">Số điện thoại & Liên lạc</th>
+                            <th class="py-3 px-4">Tổ công tác</th>
+                            <th class="py-3 px-4">Liên hệ & Tài khoản</th>
+                            <th class="py-3 px-4 text-center">Mã QR (STK)</th>
                             <th class="py-3 px-4 text-center">Hộ / Khẩu (TT & Tạm trú)</th>
                             <th class="py-3 px-4 text-center">Thao tác</th>
                         </tr>
@@ -179,24 +202,32 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="font-semibold text-gray-900" x-text="item['Họ tên']"></div>
-                                    <div class="text-xs text-gray-400" x-text="'Ngày sinh: ' + (item['Năm sinh'] || 'Chưa có')"></div>
+                                    <div class="text-xs text-gray-500" x-text="'NS: ' + (item['Năm sinh'] || '---') + ' | ' + (item['Giới tính'] || '---') + ' | ' + (item['Dân tộc'] || '---')"></div>
+                                    <div class="text-xs text-gray-400 mt-0.5" x-text="'Quê quán: ' + (item['Quê quán'] || '---')"></div>
+                                    <div class="text-xs text-gray-400" x-text="'Cư trú: ' + (item['Nơi cư trú'] || '---')"></div>
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="font-medium text-blue-600" x-text="item['Cấp bậc']"></div>
                                     <div class="text-xs text-gray-500" x-text="item['Chức vụ']"></div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="text-gray-800" x-text="item['Địa bàn phụ trách']"></div>
+                                    <div class="text-gray-800 font-medium" x-text="item['Tổ công tác']"></div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="font-semibold text-gray-900" x-text="item['Số điện thoại'] || 'Chưa có'"></div>
+                                    <div class="font-semibold text-gray-900" x-text="item['Số điện thoại'] || 'Chưa có SĐT'"></div>
+                                    <div class="text-xs text-purple-600 font-medium mt-0.5" x-text="item['Số tài khoản ngân hàng'] ? ('STK: ' + item['Số tài khoản ngân hàng']) : 'Chưa có STK'"></div>
                                     <div class="flex items-center gap-2 mt-1" x-show="item['Số điện thoại']">
                                         <a :href="'tel:' + item['Số điện thoại']" class="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-lg font-medium transition">
-                                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Gọi điện
+                                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Gọi
                                         </a>
                                         <a :href="'https://zalo.me/' + item['Số điện thoại']" target="_blank" class="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-2.5 py-1 rounded-lg font-medium transition">
                                             <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Zalo
                                         </a>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <div class="flex justify-center">
+                                        <div :id="'qrcode-table-' + item.id" class="p-1 bg-white border border-gray-200 rounded-lg shadow-sm inline-block" x-init="generateTableQRCode(item)"></div>
                                     </div>
                                 </td>
                                 <td class="py-3 px-4 text-center">
@@ -220,7 +251,7 @@
                         </template>
                         <template x-if="filteredList.length === 0">
                             <tr>
-                                <td colspan="8" class="py-12 text-center text-gray-400">Không tìm thấy dữ liệu phù hợp.</td>
+                                <td colspan="9" class="py-12 text-center text-gray-400">Không tìm thấy dữ liệu phù hợp.</td>
                             </tr>
                         </template>
                     </tbody>
@@ -275,6 +306,17 @@
                             <input type="text" x-model="form['Năm sinh']" required placeholder="VD: 25/07/1979" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Giới tính</label>
+                            <select x-model="form['Giới tính']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Dân tộc</label>
+                            <input type="text" x-model="form['Dân tộc']" placeholder="VD: Kinh" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Cấp bậc</label>
                             <input type="text" x-model="form['Cấp bậc']" placeholder="VD: Đại úy" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
@@ -282,13 +324,25 @@
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Chức vụ</label>
                             <input type="text" x-model="form['Chức vụ']" placeholder="VD: Cảnh sát khu vực" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Quê quán</label>
+                            <input type="text" x-model="form['Quê quán']" placeholder="VD: Xã..., Huyện..., Tỉnh..." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nơi cư trú</label>
+                            <input type="text" x-model="form['Nơi cư trú']" placeholder="VD: Số nhà..., Phường..., TP..." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Số điện thoại</label>
                             <input type="text" x-model="form['Số điện thoại']" placeholder="VD: 0905123456" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Địa bàn phụ trách / Nhóm công tác</label>
-                            <input type="text" x-model="form['Địa bàn phụ trách']" placeholder="VD: Nhóm CSKV Thành Công" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Số tài khoản ngân hàng</label>
+                            <input type="text" x-model="form['Số tài khoản ngân hàng']" placeholder="VD: 1900xxxx - Ngân hàng..." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Tổ công tác *</label>
+                            <input type="text" x-model="form['Tổ công tác']" required placeholder="VD: Thành Công, PCCC..." class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng hộ thường trú</label>
@@ -305,6 +359,15 @@
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng khẩu tạm trú</label>
                             <input type="number" x-model.number="form['Tổng số khẩu tạm trú']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Xem trước QR trong Modal -->
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center gap-4">
+                        <div id="modalQRCode" class="bg-white p-2 rounded-xl border shadow-sm"></div>
+                        <div class="text-xs text-gray-500 text-center sm:text-left">
+                            <p class="font-semibold text-gray-700">Mã QR thông tin tài khoản / cá nhân tự động tạo</p>
+                            <p class="mt-1">Mã QR này được sinh ra tự động từ Số tài khoản ngân hàng và thông tin cá nhân để người dùng quét trực tiếp.</p>
                         </div>
                     </div>
 
@@ -331,21 +394,8 @@
                 mediaStream: null,
                 form: {},
 
-                // Danh sách các nhóm thống kê theo yêu cầu
-                targetGroups: [
-                    'Chỉ huy',
-                    'Nhóm CSKV Thành Công',
-                    'Nhóm CSKV Tân Lợi',
-                    'Nhóm CSKV Tự An',
-                    'Nhóm CSKV Tân Tiến',
-                    'Nhóm CSKV Tân Thành',
-                    'Nhóm CSKV Cư Êbur',
-                    'Nhóm Cư trú-Tàng thư-Căn cước',
-                    'Nhóm PCCC-Ngành nghề'
-                ],
-
                 init() {
-                    const savedData = localStorage.getItem('cskv_ds_cbcs_v5');
+                    const savedData = localStorage.getItem('cskv_ds_cbcs_v7');
                     if (savedData) {
                         this.cskvList = JSON.parse(savedData);
                     } else {
@@ -356,9 +406,14 @@
                                 'TT': 1,
                                 'Họ tên': 'Nguyễn Văn A',
                                 'Năm sinh': '25/07/1979',
+                                'Giới tính': 'Nam',
+                                'Dân tộc': 'Kinh',
+                                'Quê quán': 'Điện Phước, Điện Bàn, Quảng Nam',
+                                'Nơi cư trú': 'Thành Công, Tân Lợi, TP. Huế',
                                 'Cấp bậc': 'Thiếu tá',
                                 'Chức vụ': 'Cảnh sát khu vực',
-                                'Địa bàn phụ trách': 'Nhóm CSKV Thành Công',
+                                'Tổ công tác': 'Thành Công',
+                                'Số tài khoản ngân hàng': '19031234567890 - Techcombank',
                                 'Tổng số hộ thường trú': 120,
                                 'Tổng số khẩu thường trú': 450,
                                 'Tổng số hộ tạm trú': 15,
@@ -377,26 +432,92 @@
                     this.$watch('cskvList', () => {
                         this.saveToStorage();
                         this.checkBirthdayAt6AM();
-                        this.$nextTick(() => lucide.createIcons());
+                        this.$nextTick(() => {
+                            lucide.createIcons();
+                            this.renderAllTableQRCodes();
+                        });
                     });
-                    this.$nextTick(() => lucide.createIcons());
+
+                    this.$watch('form', () => {
+                        if (this.showModal) {
+                            this.renderModalQRCode();
+                        }
+                    }, { deep: true });
+
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        this.renderAllTableQRCodes();
+                    });
                 },
 
                 saveToStorage() {
-                    localStorage.setItem('cskv_ds_cbcs_v5', JSON.stringify(this.cskvList));
+                    localStorage.setItem('cskv_ds_cbcs_v7', JSON.stringify(this.cskvList));
                 },
 
-                // Tính toán số lượng CBCS cho từng nhóm dựa theo chuỗi trong "Địa bàn phụ trách" hoặc "Chức vụ"
-                get groupStats() {
-                    return this.targetGroups.map(groupName => {
-                        const count = this.cskvList.filter(item => {
-                            const location = (item['Địa bàn phụ trách'] || '').toLowerCase();
-                            const position = (item['Chức vụ'] || '').toLowerCase();
-                            const nameLower = groupName.toLowerCase();
-                            return location.includes(nameLower) || position.includes(nameLower) || (groupName === 'Chỉ huy' && (position.includes('chỉ huy') || position.includes('trưởng') || position.includes('phó')));
-                        }).length;
-                        return { name: groupName, count: count };
+                generateTableQRCode(item) {
+                    this.$nextTick(() => {
+                        const containerId = 'qrcode-table-' + item.id;
+                        const container = document.getElementById(containerId);
+                        if (container) {
+                            container.innerHTML = '';
+                            const qrText = `Họ tên: ${item['Họ tên'] || ''}\nSĐT: ${item['Số điện thoại'] || ''}\nSTK: ${item['Số tài khoản ngân hàng'] || 'Chưa có'}\nTổ CT: ${item['Tổ công tác'] || ''}`;
+                            new QRCode(container, {
+                                text: qrText,
+                                width: 64,
+                                height: 64,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.L
+                            });
+                        }
                     });
+                },
+
+                renderAllTableQRCodes() {
+                    this.cskvList.forEach(item => {
+                        this.generateTableQRCode(item);
+                    });
+                },
+
+                renderModalQRCode() {
+                    setTimeout(() => {
+                        const container = document.getElementById('modalQRCode');
+                        if (container) {
+                            container.innerHTML = '';
+                            const qrText = `Họ tên: ${this.form['Họ tên'] || ''}\nSĐT: ${this.form['Số điện thoại'] || ''}\nSTK: ${this.form['Số tài khoản ngân hàng'] || 'Chưa có'}\nTổ CT: ${this.form['Tổ công tác'] || ''}`;
+                            new QRCode(container, {
+                                text: qrText,
+                                width: 96,
+                                height: 96,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.L
+                            });
+                        }
+                    }, 100);
+                },
+
+                get teamStats() {
+                    const statsMap = {};
+                    this.cskvList.forEach(item => {
+                        const team = item['Tổ công tác'] ? String(item['Tổ công tác']).trim() : 'Chưa phân công';
+                        if (!statsMap[team]) {
+                            statsMap[team] = {
+                                name: team,
+                                cbcsCount: 0,
+                                hoTT: 0,
+                                khauTT: 0,
+                                hoTP: 0,
+                                khauTP: 0
+                            };
+                        }
+                        statsMap[team].cbcsCount += 1;
+                        statsMap[team].hoTT += Number(item['Tổng số hộ thường trú'] || 0);
+                        statsMap[team].khauTT += Number(item['Tổng số khẩu thường trú'] || 0);
+                        statsMap[team].hoTP += Number(item['Tổng số hộ tạm trú'] || 0);
+                        statsMap[team].khauTP += Number(item['Tổng số khẩu tạm trú'] || 0);
+                    });
+                    return Object.values(statsMap);
                 },
 
                 checkBirthdayAt6AM() {
@@ -440,9 +561,12 @@
                         const q = this.searchQuery.toLowerCase();
                         result = result.filter(item => 
                             (item['Họ tên'] && item['Họ tên'].toLowerCase().includes(q)) ||
-                            (item['Địa bàn phụ trách'] && item['Địa bàn phụ trách'].toLowerCase().includes(q)) ||
+                            (item['Tổ công tác'] && item['Tổ công tác'].toLowerCase().includes(q)) ||
+                            (item['Quê quán'] && item['Quê quán'].toLowerCase().includes(q)) ||
+                            (item['Nơi cư trú'] && item['Nơi cư trú'].toLowerCase().includes(q)) ||
                             (item['Chức vụ'] && item['Chức vụ'].toLowerCase().includes(q)) ||
-                            (item['Số điện thoại'] && String(item['Số điện thoại']).toLowerCase().includes(q))
+                            (item['Số điện thoại'] && String(item['Số điện thoại']).toLowerCase().includes(q)) ||
+                            (item['Số tài khoản ngân hàng'] && String(item['Số tài khoản ngân hàng']).toLowerCase().includes(q))
                         );
                     }
                     result.sort((a, b) => {
@@ -465,9 +589,14 @@
                         image: '',
                         'Họ tên': '',
                         'Năm sinh': '',
+                        'Giới tính': 'Nam',
+                        'Dân tộc': 'Kinh',
+                        'Quê quán': '',
+                        'Nơi cư trú': '',
                         'Cấp bậc': '',
                         'Chức vụ': 'Cảnh sát khu vực',
-                        'Địa bàn phụ trách': '',
+                        'Tổ công tác': '',
+                        'Số tài khoản ngân hàng': '',
                         'Tổng số hộ thường trú': 0,
                         'Tổng số khẩu thường trú': 0,
                         'Tổng số hộ tạm trú': 0,
@@ -475,12 +604,14 @@
                         'Số điện thoại': ''
                     };
                     this.showModal = true;
+                    this.renderModalQRCode();
                 },
 
                 editItem(item) {
                     this.isEditing = true;
                     this.form = { ...item };
                     this.showModal = true;
+                    this.renderModalQRCode();
                 },
 
                 closeModal() {
