@@ -44,8 +44,33 @@
             </div>
         </header>
 
+        <!-- THÔNG BÁO / CẢNH BÁO SINH NHẬT LÚC 06:00 SÁNG -->
+        <div x-show="birthdayAlerts.length > 0" class="mb-6 bg-gradient-to-r from-pink-500 to-rose-500 text-white p-4 rounded-2xl shadow-md flex items-start gap-3" style="display: none;">
+            <div class="p-2 bg-white/20 rounded-xl mt-0.5">
+                <i data-lucide="cake" class="w-6 h-6"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <span>Cảnh báo Sinh nhật hôm nay (Hệ thống kiểm tra lúc 06:00 sáng)</span>
+                    <span class="text-xs bg-white/30 px-2 py-0.5 rounded-full" x-text="birthdayAlerts.length + ' CBCS'"></span>
+                </h3>
+                <p class="text-xs text-white/90 mt-1">Hôm nay là ngày sinh nhật của các đồng chí sau. Hãy gửi lời chúc mừng tốt đẹp nhất!</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                    <template x-for="cb in birthdayAlerts" :key="cb.id">
+                        <div class="bg-white/15 border border-white/20 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2">
+                            <span class="font-semibold" x-text="cb['Họ tên']"></span>
+                            <span class="opacity-80" x-text="'(' + cb['Năm sinh'] + ')'"></span>
+                            <a :href="'https://zalo.me/' + cb['Số điện thoại']" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded-lg flex items-center gap-1 font-medium transition" x-show="cb['Số điện thoại']">
+                                <i data-lucide="message-circle" class="w-3 h-3"></i> Chúc Zalo
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
         <!-- THỐNG KÊ TỔNG QUAN -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Tổng số CBCS</p>
@@ -75,12 +100,39 @@
             </div>
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
                 <div>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Hộ tạm trú</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1" x-text="totalHoTamTru">0</h3>
+                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <i data-lucide="building" class="w-6 h-6"></i>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
+                <div>
                     <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Khẩu tạm trú</p>
                     <h3 class="text-2xl font-bold text-gray-900 mt-1" x-text="totalKhauTamTru">0</h3>
                 </div>
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                <div class="p-3 bg-orange-50 text-orange-600 rounded-xl">
                     <i data-lucide="users-round" class="w-6 h-6"></i>
                 </div>
+            </div>
+        </div>
+
+        <!-- THỐNG KÊ THEO NHÓM / ĐƠN VỊ / ĐỊA BÀN -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-6">
+            <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Thống kê số lượng CBCS theo các Nhóm / Đơn vị
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                <template x-for="group in groupStats" :key="group.name">
+                    <div @click="searchQuery = group.name" class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 p-3 rounded-xl cursor-pointer transition flex flex-col justify-between">
+                        <span class="text-xs font-medium text-gray-600 line-clamp-1" x-text="group.name"></span>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <span class="text-lg font-bold text-blue-600" x-text="group.count"></span>
+                            <span class="text-[10px] text-gray-400">CBCS</span>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
 
@@ -90,7 +142,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                     <i data-lucide="search" class="w-4 h-4"></i>
                 </span>
-                <input type="text" x-model="searchQuery" placeholder="Tìm theo họ tên, số hiệu, địa bàn phụ trách, quê quán..." class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" x-model="searchQuery" placeholder="Tìm theo họ tên, số điện thoại, địa bàn phụ trách..." class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <span class="text-sm text-gray-500 whitespace-nowrap">Sắp xếp:</span>
@@ -110,10 +162,11 @@
                         <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-semibold uppercase tracking-wider">
                             <th class="py-3 px-4 text-center w-12">TT</th>
                             <th class="py-3 px-4 w-16">Ảnh</th>
-                            <th class="py-3 px-4">Họ tên & Số hiệu</th>
+                            <th class="py-3 px-4">Họ tên</th>
                             <th class="py-3 px-4">Cấp bậc & Chức vụ</th>
                             <th class="py-3 px-4">Địa bàn phụ trách</th>
-                            <th class="py-3 px-4 text-center">Hộ / Khẩu TT</th>
+                            <th class="py-3 px-4">Số điện thoại & Liên lạc</th>
+                            <th class="py-3 px-4 text-center">Hộ / Khẩu (TT & Tạm trú)</th>
                             <th class="py-3 px-4 text-center">Thao tác</th>
                         </tr>
                     </thead>
@@ -126,7 +179,7 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="font-semibold text-gray-900" x-text="item['Họ tên']"></div>
-                                    <div class="text-xs text-gray-400" x-text="'Số hiệu: ' + (item['Số hiệu '] || 'Chưa có')"></div>
+                                    <div class="text-xs text-gray-400" x-text="'Ngày sinh: ' + (item['Năm sinh'] || 'Chưa có')"></div>
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="font-medium text-blue-600" x-text="item['Cấp bậc']"></div>
@@ -134,10 +187,24 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="text-gray-800" x-text="item['Địa bàn phụ trách']"></div>
-                                    <div class="text-xs text-gray-400" x-text="'SĐT: ' + (item['Số điện thoại'] || 'Chưa có')"></div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="font-semibold text-gray-900" x-text="item['Số điện thoại'] || 'Chưa có'"></div>
+                                    <div class="flex items-center gap-2 mt-1" x-show="item['Số điện thoại']">
+                                        <a :href="'tel:' + item['Số điện thoại']" class="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-lg font-medium transition">
+                                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Gọi điện
+                                        </a>
+                                        <a :href="'https://zalo.me/' + item['Số điện thoại']" target="_blank" class="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-2.5 py-1 rounded-lg font-medium transition">
+                                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Zalo
+                                        </a>
+                                    </div>
                                 </td>
                                 <td class="py-3 px-4 text-center">
-                                    <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-lg font-medium" x-text="(item['Tổng số hộ thường trú'] || 0) + ' hộ / ' + (item['Tổng số khẩu thường trú'] || 0) + ' khẩu'"></span>
+                                    <div class="space-y-1">
+                                        <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2.5 py-0.5 rounded-lg font-medium" x-text="'Thường trú: ' + (item['Tổng số hộ thường trú'] || 0) + ' hộ / ' + (item['Tổng số khẩu thường trú'] || 0) + ' khẩu'"></span>
+                                        <br>
+                                        <span class="inline-block bg-amber-50 text-amber-700 text-xs px-2.5 py-0.5 rounded-lg font-medium" x-text="'Tạm trú: ' + (item['Tổng số hộ tạm trú'] || 0) + ' hộ / ' + (item['Tổng số khẩu tạm trú'] || 0) + ' khẩu'"></span>
+                                    </div>
                                 </td>
                                 <td class="py-3 px-4 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
@@ -153,7 +220,7 @@
                         </template>
                         <template x-if="filteredList.length === 0">
                             <tr>
-                                <td colspan="7" class="py-12 text-center text-gray-400">Không tìm thấy dữ liệu phù hợp.</td>
+                                <td colspan="8" class="py-12 text-center text-gray-400">Không tìm thấy dữ liệu phù hợp.</td>
                             </tr>
                         </template>
                     </tbody>
@@ -204,7 +271,7 @@
                             <input type="text" x-model="form['Họ tên']" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Năm sinh *</label>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Ngày sinh (dd/mm/yyyy) *</label>
                             <input type="text" x-model="form['Năm sinh']" required placeholder="VD: 25/07/1979" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
@@ -216,16 +283,12 @@
                             <input type="text" x-model="form['Chức vụ']" placeholder="VD: Cảnh sát khu vực" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Số hiệu</label>
-                            <input type="text" x-model="form['Số hiệu ']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Số điện thoại</label>
-                            <input type="text" x-model="form['Số điện thoại']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                            <input type="text" x-model="form['Số điện thoại']" placeholder="VD: 0905123456" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <div class="sm:col-span-3">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Địa bàn phụ trách</label>
-                            <input type="text" x-model="form['Địa bàn phụ trách']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Địa bàn phụ trách / Nhóm công tác</label>
+                            <input type="text" x-model="form['Địa bàn phụ trách']" placeholder="VD: Nhóm CSKV Thành Công" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng hộ thường trú</label>
@@ -234,6 +297,10 @@
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng khẩu thường trú</label>
                             <input type="number" x-model.number="form['Tổng số khẩu thường trú']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng hộ tạm trú</label>
+                            <input type="number" x-model.number="form['Tổng số hộ tạm trú']" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Tổng khẩu tạm trú</label>
@@ -255,6 +322,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('cskvApp', () => ({
                 cskvList: [],
+                birthdayAlerts: [],
                 searchQuery: '',
                 sortBy: 'name_asc',
                 showModal: false,
@@ -263,8 +331,21 @@
                 mediaStream: null,
                 form: {},
 
+                // Danh sách các nhóm thống kê theo yêu cầu
+                targetGroups: [
+                    'Chỉ huy',
+                    'Nhóm CSKV Thành Công',
+                    'Nhóm CSKV Tân Lợi',
+                    'Nhóm CSKV Tự An',
+                    'Nhóm CSKV Tân Tiến',
+                    'Nhóm CSKV Tân Thành',
+                    'Nhóm CSKV Cư Êbur',
+                    'Nhóm Cư trú-Tàng thư-Căn cước',
+                    'Nhóm PCCC-Ngành nghề'
+                ],
+
                 init() {
-                    const savedData = localStorage.getItem('cskv_ds_cbcs_v2');
+                    const savedData = localStorage.getItem('cskv_ds_cbcs_v5');
                     if (savedData) {
                         this.cskvList = JSON.parse(savedData);
                     } else {
@@ -277,25 +358,67 @@
                                 'Năm sinh': '25/07/1979',
                                 'Cấp bậc': 'Thiếu tá',
                                 'Chức vụ': 'Cảnh sát khu vực',
-                                'Địa bàn phụ trách': 'Khu phố 1',
+                                'Địa bàn phụ trách': 'Nhóm CSKV Thành Công',
                                 'Tổng số hộ thường trú': 120,
                                 'Tổng số khẩu thường trú': 450,
+                                'Tổng số hộ tạm trú': 15,
                                 'Tổng số khẩu tạm trú': 30,
-                                'Số hiệu ': '123-456',
                                 'Số điện thoại': '0905123456'
                             }
                         ];
                         this.saveToStorage();
                     }
+                    
+                    this.checkBirthdayAt6AM();
+                    setInterval(() => {
+                        this.checkBirthdayAt6AM();
+                    }, 60000);
+
                     this.$watch('cskvList', () => {
                         this.saveToStorage();
+                        this.checkBirthdayAt6AM();
                         this.$nextTick(() => lucide.createIcons());
                     });
                     this.$nextTick(() => lucide.createIcons());
                 },
 
                 saveToStorage() {
-                    localStorage.setItem('cskv_ds_cbcs_v2', JSON.stringify(this.cskvList));
+                    localStorage.setItem('cskv_ds_cbcs_v5', JSON.stringify(this.cskvList));
+                },
+
+                // Tính toán số lượng CBCS cho từng nhóm dựa theo chuỗi trong "Địa bàn phụ trách" hoặc "Chức vụ"
+                get groupStats() {
+                    return this.targetGroups.map(groupName => {
+                        const count = this.cskvList.filter(item => {
+                            const location = (item['Địa bàn phụ trách'] || '').toLowerCase();
+                            const position = (item['Chức vụ'] || '').toLowerCase();
+                            const nameLower = groupName.toLowerCase();
+                            return location.includes(nameLower) || position.includes(nameLower) || (groupName === 'Chỉ huy' && (position.includes('chỉ huy') || position.includes('trưởng') || position.includes('phó')));
+                        }).length;
+                        return { name: groupName, count: count };
+                    });
+                },
+
+                checkBirthdayAt6AM() {
+                    const now = new Date();
+                    const hours = now.getHours();
+
+                    if (hours >= 6) {
+                        const todayStr = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0');
+                        
+                        this.birthdayAlerts = this.cskvList.filter(item => {
+                            const dob = item['Năm sinh'];
+                            if (!dob) return false;
+                            const parts = dob.split(/[\/\-]/);
+                            if (parts.length >= 2) {
+                                const dayMonth = parts[0] + '/' + parts[1];
+                                return dayMonth === todayStr;
+                            }
+                            return false;
+                        });
+                    } else {
+                        this.birthdayAlerts = [];
+                    }
                 },
 
                 get totalHoThuongTru() {
@@ -303,6 +426,9 @@
                 },
                 get totalKhauThuongTru() {
                     return this.cskvList.reduce((sum, item) => sum + Number(item['Tổng số khẩu thường trú'] || 0), 0);
+                },
+                get totalHoTamTru() {
+                    return this.cskvList.reduce((sum, item) => sum + Number(item['Tổng số hộ tạm trú'] || 0), 0);
                 },
                 get totalKhauTamTru() {
                     return this.cskvList.reduce((sum, item) => sum + Number(item['Tổng số khẩu tạm trú'] || 0), 0);
@@ -315,7 +441,8 @@
                         result = result.filter(item => 
                             (item['Họ tên'] && item['Họ tên'].toLowerCase().includes(q)) ||
                             (item['Địa bàn phụ trách'] && item['Địa bàn phụ trách'].toLowerCase().includes(q)) ||
-                            (item['Số hiệu '] && String(item['Số hiệu ']).toLowerCase().includes(q))
+                            (item['Chức vụ'] && item['Chức vụ'].toLowerCase().includes(q)) ||
+                            (item['Số điện thoại'] && String(item['Số điện thoại']).toLowerCase().includes(q))
                         );
                     }
                     result.sort((a, b) => {
@@ -343,8 +470,8 @@
                         'Địa bàn phụ trách': '',
                         'Tổng số hộ thường trú': 0,
                         'Tổng số khẩu thường trú': 0,
+                        'Tổng số hộ tạm trú': 0,
                         'Tổng số khẩu tạm trú': 0,
-                        'Số hiệu ': '',
                         'Số điện thoại': ''
                     };
                     this.showModal = true;
